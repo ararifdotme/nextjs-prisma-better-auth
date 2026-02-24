@@ -8,16 +8,16 @@ const serverEnvSchema = z.object({
 	DATABASE_NAME: z.string(),
 	DATABASE_HOST: z.string(),
 	DATABASE_PORT: z.coerce.number().default(3306),
+	BETTER_AUTH_SECRET: z.string(),
+	BETTER_AUTH_URL: z.string(),
 });
 
 const clientEnvSchema = z.object({
-	NEXT_PUBLIC_API_URL: z.string().url(),
-	NEXT_PUBLIC_ANALYTICS_ID: z.string()
+	NEXT_PUBLIC_APP_URL: z.string(),
 });
 
 const clientEnv = clientEnvSchema.safeParse({
-	NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
-	NEXT_PUBLIC_ANALYTICS_ID: process.env.NEXT_PUBLIC_ANALYTICS_ID,
+	NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
 });
 
 if (!clientEnv.success) {
