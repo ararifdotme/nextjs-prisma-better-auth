@@ -1,5 +1,5 @@
 {
-  "name": "main-site",
+  "name": "nextjs-prisma-better-auth",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -11,6 +11,7 @@
   "dependencies": {
     "@prisma/adapter-mariadb": "^7.4.1",
     "@prisma/client": "^7.4.1",
+    "better-auth": "^1.4.19",
     "dotenv": "^17.3.1",
     "next": "16.1.6",
     "react": "19.2.3",
@@ -18,6 +19,7 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
+    "@better-auth/cli": "^1.4.19",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20.19.33",
     "@types/react": "^19",
