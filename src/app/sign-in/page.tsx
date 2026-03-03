@@ -3,12 +3,17 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { signIn, useSession } from "@/lib/auth-client";
+import { authClient } from "@/lib/auth-client";
 
 export default function SignInPage() {
 	const router = useRouter();
 	const [error, setError] = useState<string | null>(null);
-	const session = useSession();
+	const [successMessage, setSuccessMessage] = useState<string | null>(null);
+	const [email, setEmail] = useState("");
+	const [unverifiedEmail, setUnverifiedEmail] = useState<string | null>(null);
+	const [isSubmitting, setIsSubmitting] = useState(false);
+	const [isResending, setIsResending] = useState(false);
+	const session = authClient.useSession();
 
 	useEffect(() => {
 		if (session.isPending === false && session.data?.user) {
@@ -18,23 +23,57 @@ export default function SignInPage() {
 
 	async function handleSubmit(e: React.SubmitEvent<HTMLFormElement>) {
 		e.preventDefault();
+		setIsSubmitting(true);
 		setError(null);
+		setSuccessMessage(null);
+		setUnverifiedEmail(null);
 
 		const formData = new FormData(e.currentTarget);
+		const inputEmail = formData.get("email") as string;
 
-		await signIn.email({
-			email: formData.get("email") as string,
-			password: formData.get("password") as string,
-			rememberMe: true,
-			fetchOptions: {
-				onSuccess: () => {
-					router.push("/dashboard");
+		try {
+			await authClient.signIn.email({
+				email: inputEmail,
+				password: formData.get("password") as string,
+				rememberMe: true,
+				fetchOptions: {
+					onSuccess: () => {
+						router.push("/dashboard");
+					},
+					onError: ({ error }) => {
+						const message = error.message || "Something went wrong.";
+						if (/email.*not.*verified|not verified/i.test(message)) {
+							setUnverifiedEmail(inputEmail);
+							setSuccessMessage("Your email is not verified. Please check your inbox for verification.");
+							return;
+						}
+
+						setError(message);
+					},
 				},
-				onError: ({ error }) => {
-					setError(error.message || "Something went wrong.");
-				},
-			},
-		});
+			});
+		} finally {
+			setIsSubmitting(false);
+		}
+	}
+
+	async function handleResendVerificationEmail() {
+		if (!unverifiedEmail) return;
+
+		setIsResending(true);
+		setError(null);
+
+		try {
+			await authClient.sendVerificationEmail({
+				email: unverifiedEmail,
+				callbackURL: `${window.location.origin}/dashboard`,
+			});
+			setSuccessMessage("Verification email resent. Please check your inbox.");
+		} catch {
+			setError("Failed to resend verification email. Please try again.");
+		}
+
+		setIsResending(false);
 	}
 
 	return (
@@ -54,6 +93,8 @@ export default function SignInPage() {
 							id="email"
 							name="email"
 							type="email"
+							value={email}
+							onChange={(e) => setEmail(e.target.value)}
 							placeholder="you@example.com"
 							required
 							className="w-full rounded-lg border border-indigo-200 bg-white/90 px-3 py-2.5 text-sm outline-none transition focus:border-violet-400 focus:ring-2 focus:ring-violet-200"
@@ -80,11 +121,41 @@ export default function SignInPage() {
 						</div>
 					)}
 
+					{successMessage && (
+						<div aria-live="polite" className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700">
+							<div>{successMessage}</div>
+							{unverifiedEmail && (
+								<div className="mt-2 text-xs text-emerald-700/90">
+									Didn&apos;t get the email?{" "}
+									<button
+										type="button"
+										onClick={handleResendVerificationEmail}
+										disabled={isResending}
+										className="font-semibold text-emerald-800 underline decoration-emerald-500/70 underline-offset-2 transition hover:text-emerald-900 hover:decoration-emerald-700 disabled:no-underline disabled:cursor-not-allowed disabled:opacity-70 cursor-pointer"
+									>
+										{isResending ? "Resending..." : "Resend verification email"}
+									</button>
+								</div>
+							)}
+						</div>
+					)}
+
+					<div className="text-right">
+						<Link href="/forgot-password" className="text-xs font-semibold text-violet-700 transition-colors hover:text-violet-800">
+							Forgot password?
+						</Link>
+					</div>
+
 					<button
 						type="submit"
-						className="w-full rounded-lg bg-linear-to-r from-indigo-500 via-violet-500 to-fuchsia-500 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:from-indigo-600 hover:via-violet-600 hover:to-fuchsia-600 cursor-pointer"
+						disabled={isSubmitting}
+						className={`w-full rounded-lg px-4 py-2.5 text-sm font-semibold text-white transition-colors ${
+							isSubmitting
+								? "bg-linear-to-r from-indigo-400 via-violet-400 to-fuchsia-400 opacity-70 cursor-not-allowed"
+								: "bg-linear-to-r from-indigo-500 via-violet-500 to-fuchsia-500 hover:from-indigo-600 hover:via-violet-600 hover:to-fuchsia-600 cursor-pointer"
+						}`}
 					>
-						Sign In
+						{isSubmitting ? "Signing in..." : "Sign In"}
 					</button>
 				</form>
 

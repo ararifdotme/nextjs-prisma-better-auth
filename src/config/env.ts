@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 const serverEnvSchema = z.object({
+	APP_NAME: z.string(),
 	APP_ENV: z.enum(['development', 'production']).default('development'),
 	DATABASE_URL: z.string(),
 	DATABASE_USER: z.string(),
@@ -10,6 +11,11 @@ const serverEnvSchema = z.object({
 	DATABASE_PORT: z.coerce.number().default(3306),
 	BETTER_AUTH_SECRET: z.string(),
 	BETTER_AUTH_URL: z.string(),
+	SMTP_HOST: z.string(),
+	SMTP_PORT: z.coerce.number(),
+	SMTP_USER: z.string(),
+	SMTP_PASSWORD: z.string(),
+	SMTP_SECURE: z.string().default('false').transform((val) => val.toLowerCase() === 'true'),
 });
 
 const clientEnvSchema = z.object({

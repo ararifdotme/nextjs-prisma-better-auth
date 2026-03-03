@@ -3,12 +3,16 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { signUp, useSession } from "@/lib/auth-client";
+import { authClient } from "@/lib/auth-client";
 
 export default function SignUpPage() {
 	const router = useRouter();
 	const [error, setError] = useState<string | null>(null);
-	const session = useSession();
+	const [successMessage, setSuccessMessage] = useState<string | null>(null);
+	const [pendingVerificationEmail, setPendingVerificationEmail] = useState<string | null>(null);
+	const [isSubmitting, setIsSubmitting] = useState(false);
+	const [isResending, setIsResending] = useState(false);
+	const session = authClient.useSession();
 
 	useEffect(() => {
 		if (session.isPending === false && session.data?.user) {
@@ -18,23 +22,52 @@ export default function SignUpPage() {
 
 	async function handleSubmit(e: React.SubmitEvent<HTMLFormElement>) {
 		e.preventDefault();
+		setIsSubmitting(true);
+		setError(null);
+		setSuccessMessage(null);
+
+		const formElement = e.currentTarget;
+		const formData = new FormData(formElement);
+		const email = formData.get("email") as string;
+
+		try {
+			await authClient.signUp.email({
+				name: formData.get("name") as string,
+				email,
+				password: formData.get("password") as string,
+				fetchOptions: {
+					onSuccess: () => {
+						formElement.reset();
+						setPendingVerificationEmail(email);
+						setSuccessMessage("Registration successful. Please verify your email before signing in.");
+					},
+					onError: ({ error }) => {
+						setError(error.message || "Something went wrong.");
+					},
+				},
+			});
+		} finally {
+			setIsSubmitting(false);
+		}
+	}
+
+	async function handleResendVerificationEmail() {
+		if (!pendingVerificationEmail) return;
+
+		setIsResending(true);
 		setError(null);
 
-		const formData = new FormData(e.currentTarget);
+		try {
+			await authClient.sendVerificationEmail({
+				email: pendingVerificationEmail,
+				callbackURL: `${window.location.origin}/dashboard`,
+			});
+			setSuccessMessage("Verification email resent. Please check your inbox.");
+		} catch {
+			setError("Failed to resend verification email. Please try again.");
+		}
 
-		await signUp.email({
-			name: formData.get("name") as string,
-			email: formData.get("email") as string,
-			password: formData.get("password") as string,
-			fetchOptions: {
-				onSuccess: () => {
-					router.push("/dashboard");
-				},
-				onError: ({ error }) => {
-					setError(error.message || "Something went wrong.");
-				},
-			},
-		});
+		setIsResending(false);
 	}
 
 	return (
@@ -88,6 +121,25 @@ export default function SignUpPage() {
 						/>
 					</div>
 
+					{successMessage && (
+						<div aria-live="polite" className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700">
+							<div>{successMessage}</div>
+							{pendingVerificationEmail && (
+								<div className="mt-2 text-xs text-emerald-700/90">
+									Didn&apos;t get the email?{" "}
+									<button
+										type="button"
+										onClick={handleResendVerificationEmail}
+										disabled={isResending}
+										className="font-semibold text-emerald-800 underline decoration-emerald-500/70 underline-offset-2 transition hover:text-emerald-900 hover:decoration-emerald-700 disabled:no-underline disabled:cursor-not-allowed disabled:opacity-70 cursor-pointer"
+									>
+										{isResending ? "Resending..." : "Resend verification email"}
+									</button>
+								</div>
+							)}
+						</div>
+					)}
+
 					{error && (
 						<div aria-live="polite" className="text-sm text-rose-600 text-center">
 							{error}
@@ -96,9 +148,14 @@ export default function SignUpPage() {
 
 					<button
 						type="submit"
-						className="w-full rounded-lg bg-linear-to-r from-indigo-500 via-violet-500 to-fuchsia-500 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:from-indigo-600 hover:via-violet-600 hover:to-fuchsia-600 cursor-pointer"
+						disabled={isSubmitting}
+						className={`w-full rounded-lg px-4 py-2.5 text-sm font-semibold text-white transition-colors ${
+							isSubmitting
+								? "bg-linear-to-r from-indigo-400 via-violet-400 to-fuchsia-400 opacity-70 cursor-not-allowed"
+								: "bg-linear-to-r from-indigo-500 via-violet-500 to-fuchsia-500 hover:from-indigo-600 hover:via-violet-600 hover:to-fuchsia-600 cursor-pointer"
+						}`}
 					>
-						Create Account
+						{isSubmitting ? "Creating..." : "Create Account"}
 					</button>
 				</form>
 

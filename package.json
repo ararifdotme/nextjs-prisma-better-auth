@@ -6,28 +6,35 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "email:dev": "email dev --dir=src/components/emails"
   },
   "dependencies": {
     "@prisma/adapter-mariadb": "^7.4.1",
     "@prisma/client": "^7.4.1",
+    "@react-email/components": "^1.0.8",
+    "@react-email/render": "^2.0.4",
     "better-auth": "^1.4.19",
     "dotenv": "^17.3.1",
     "next": "16.1.6",
+    "nodemailer": "^8.0.1",
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "zod": "^4.3.6"
   },
   "devDependencies": {
     "@better-auth/cli": "^1.4.19",
+    "@react-email/preview-server": "^5.2.9",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20.19.33",
+    "@types/nodemailer": "^7.0.11",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "babel-plugin-react-compiler": "1.0.0",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
     "prisma": "^7.4.1",
+    "react-email": "^5.2.9",
     "tailwindcss": "^4",
     "typescript": "^5"
   }
