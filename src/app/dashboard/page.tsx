@@ -1,12 +1,12 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useSession, signOut } from "@/lib/auth-client";
+import { authClient } from "@/lib/auth-client";
 import { useEffect } from "react";
 
 export default function DashboardPage() {
 	const router = useRouter();
-	const { data: session, isPending } = useSession();
+	const { data: session, isPending } = authClient.useSession();
 
 	useEffect(() => {
 		if (!isPending && !session?.user) {
@@ -24,7 +24,7 @@ export default function DashboardPage() {
 			<h1 className="text-2xl font-bold">Dashboard</h1>
 			<p>Welcome, {user.name || "User"}!</p>
 			<p>Email: {user.email}</p>
-			<button onClick={() => signOut()} className="w-full bg-white text-black font-medium rounded-md px-4 py-2 hover:bg-gray-200"></button>
+			<button onClick={() => authClient.signOut()} className="w-full bg-white text-black font-medium rounded-md px-4 py-2 hover:bg-gray-200"></button>
 		</main>
 	);
 }
