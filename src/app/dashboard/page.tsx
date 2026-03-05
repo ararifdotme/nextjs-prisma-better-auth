@@ -20,11 +20,13 @@ export default function DashboardPage() {
 	const { user } = session;
 
 	return (
-		<main className="max-w-md h-screen flex items-center justify-center flex-col mx-auto p-6 space-y-">
+		<section className="mx-auto mt-6 max-w-xl rounded-lg border bg-card p-6 text-card-foreground shadow-sm">
 			<h1 className="text-2xl font-bold">Dashboard</h1>
 			<p>Welcome, {user.name || "User"}!</p>
 			<p>Email: {user.email}</p>
-			<button onClick={() => authClient.signOut()} className="w-full bg-white text-black font-medium rounded-md px-4 py-2 hover:bg-gray-200"></button>
-		</main>
+			<button onClick={() => authClient.signOut()} className="mt-4 w-full rounded-md bg-primary px-4 py-2 font-medium text-primary-foreground hover:bg-primary/90">
+				Sign out
+			</button>
+		</section>
 	);
 }
