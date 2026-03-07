@@ -23,7 +23,7 @@ CREATE TABLE `session` (
     `userAgent` TEXT NULL,
     `userId` VARCHAR(191) NOT NULL,
 
-    INDEX `session_userId_idx`(`userId`(191)),
+    INDEX `session_userId_idx`(`userId`),
     UNIQUE INDEX `session_token_key`(`token`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -44,7 +44,7 @@ CREATE TABLE `account` (
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
 
-    INDEX `account_userId_idx`(`userId`(191)),
+    INDEX `account_userId_idx`(`userId`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
