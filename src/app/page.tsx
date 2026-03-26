@@ -1,6 +1,12 @@
+"use client";
 import Link from "next/link";
+import { useLocale, useTranslations } from "next-intl";
+import { setLocale } from "@/lib/utils";
 
 export default function Home() {
+	const t = useTranslations("homePage");
+	const locale = useLocale();
+
 	return (
 		<main className="min-h-screen bg-linear-to-br from-sky-200 via-indigo-200 to-fuchsia-200 text-slate-900">
 			<div className="mx-auto flex w-full max-w-6xl flex-col px-4 py-6 sm:px-6 lg:px-8">
@@ -17,6 +23,26 @@ export default function Home() {
 						</div>
 
 						<div className="flex items-center gap-2">
+							<div className="inline-flex items-center rounded-lg border border-indigo-200/80 bg-white/70 p-1">
+								<button
+									type="button"
+									onClick={() => setLocale("en")}
+									className={`rounded-md px-2.5 py-1 text-xs font-semibold transition-colors ${
+										locale === "en" ? "bg-indigo-600 text-white" : "text-indigo-700 hover:bg-indigo-100"
+									}`}
+								>
+									EN
+								</button>
+								<button
+									type="button"
+									onClick={() => setLocale("bn")}
+									className={`rounded-md px-2.5 py-1 text-xs font-semibold transition-colors ${
+										locale === "bn" ? "bg-indigo-600 text-white" : "text-indigo-700 hover:bg-indigo-100"
+									}`}
+								>
+									BN
+								</button>
+							</div>
 							<Link
 								href="/sign-in"
 								className="rounded-lg border border-indigo-200/80 bg-white/70 px-4 py-2 text-sm font-medium text-indigo-700 transition-colors hover:border-indigo-300 hover:bg-indigo-50 hover:text-indigo-800"
@@ -36,10 +62,8 @@ export default function Home() {
 				<section className="mt-12 rounded-3xl border border-white/70 bg-white/75 p-8 shadow-xl backdrop-blur-sm sm:mt-16 sm:p-12">
 					<div className="mx-auto max-w-3xl text-center">
 						<p className="mb-3 text-sm font-medium text-violet-700">Boilerplate / Starter</p>
-						<h1 className="text-4xl font-semibold tracking-tight sm:text-5xl">Ship your SaaS foundation faster</h1>
-						<p className="mt-4 text-base text-slate-600 sm:text-lg">
-							A clean starter powered by Next.js, Prisma, and Better Auth so you can focus on product features, not setup.
-						</p>
+						<h1 className="text-4xl font-semibold tracking-tight sm:text-5xl">{t("title")}</h1>
+						<p className="mt-4 text-base text-slate-600 sm:text-lg">{t("description")}</p>
 
 						<div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
 							<Link
