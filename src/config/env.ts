@@ -3,7 +3,6 @@ import { z } from 'zod';
 const serverEnvSchema = z.object({
 	APP_NAME: z.string(),
 	APP_ENV: z.enum(['development', 'production']).default('development'),
-	DATABASE_URL: z.string(),
 	DATABASE_USER: z.string(),
 	DATABASE_PASSWORD: z.string(),
 	DATABASE_NAME: z.string(),
